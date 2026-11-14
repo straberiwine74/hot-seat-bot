@@ -42,6 +42,21 @@ export const RATING_CHOICES = [
   { name: '18+ only', value: 'adult' },
 ];
 
+// Accent folding for search — must match hs_norm() in db/schema.sql.
+export const NORM_FROM = 'àáâãäåāèéêëēìíîïòóôõöøùúûüýÿçñ';
+export const NORM_TO = 'aaaaaaaeeeeeiiiioooooouuuuyycn';
+export function normalizeForSearch(s: string): string {
+  let out = '';
+  for (const ch of s.toLowerCase()) {
+    const i = NORM_FROM.indexOf(ch);
+    out += i >= 0 ? NORM_TO[i] : ch;
+  }
+  return out;
+}
+
+export const SEARCH_PAGE_SIZE = 20;
+export const SIMILAR_MIN_SCORE = 0.5; // share of topic words in common (0–1)
+
 export const MAX_PROMPT_LENGTH = 300;
 export const MAX_WYR_OPTION_LENGTH = 150;
 export const MAX_PENDING_PER_USER = 25;

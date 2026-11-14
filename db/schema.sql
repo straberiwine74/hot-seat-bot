@@ -104,3 +104,17 @@ CREATE TABLE IF NOT EXISTS votes (
   PRIMARY KEY (message_id, user_id)
 );
 CREATE INDEX IF NOT EXISTS votes_created_idx ON votes (created_at);
+
+-- ─────────────────────────────────────────────────────────────
+-- Search + duplicate detection (v0.1.3)
+-- hs_norm: lowercase + strip common accents, so "Ménage" matches "menage".
+-- Keep the two character lists in sync with NORM_FROM / NORM_TO in src/constants.ts.
+-- ─────────────────────────────────────────────────────────────
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+CREATE OR REPLACE FUNCTION hs_norm(t TEXT) RETURNS TEXT
+  LANGUAGE sql IMMUTABLE PARALLEL SAFE
+  AS $$ SELECT translate(lower(t), 'àáâãäåāèéêëēìíîïòóôõöøùúûüýÿçñ', 'aaaaaaaeeeeeiiiioooooouuuuyycn') $$;
+
+CREATE INDEX IF NOT EXISTS prompts_search_trgm
+  ON prompts USING gin (hs_norm(text || ' ' || COALESCE(option_b, '')) gin_trgm_ops);

@@ -28,6 +28,13 @@ export function promptBody(p: Pick<Prompt, 'type' | 'text' | 'option_b'>): strin
   }
 }
 
+/** Compact single line for lists: **#12** · Truth 🔥 · Funny — text */
+export function promptOneLiner(p: Prompt, maxLen = 140): string {
+  const body = p.type === 'wyr' ? `${p.text} **or** ${p.option_b ?? ''}` : p.text;
+  const clipped = body.length > maxLen ? body.slice(0, maxLen - 1) + '…' : body;
+  return `**#${p.id}** · ${GAMES[p.type].label}${p.is_adult ? ' 🔥' : ''} · ${categoryName(p.category)} — ${clipped}`;
+}
+
 export function promptFooter(p: Prompt): string {
   const parts = [`#${p.id}`, categoryName(p.category)];
   if (p.show_credit && p.submitted_by_name) parts.push(`Submitted by ${p.submitted_by_name}`);

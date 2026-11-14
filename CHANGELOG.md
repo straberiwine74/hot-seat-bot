@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3] — 2026-11-14
+### Added
+- feat: `/hs-admin search terms:` — case- and accent-insensitive search of prompt text (incl. WYR option B). Use `|` for alternatives (`menage | threesome | three way`). Filters: `game`, `status` (default Approved, or All), `page` (20 per page).
+- feat: Review cards show **🔎 Similar prompts already in the deck** — top 3 approved/pending prompts on the same topic, with % match. Ignores boilerplate like "Have you ever…". Kept on the card after approve/reject/edit.
+### Database
+- `pg_trgm` extension, `hs_norm()` accent-folding function, trigram index on prompt text. Re-run `db/schema.sql`.
+
 ## [0.1.2] — 2026-11-14
 ### Added
 - feat: `/settings adult` takes `mode:` — **Mixed (clean + 18+)** or **18+ only** — as the default in 18+ channels. Omitting `mode` keeps the current one. Players can still choose `rating:` explicitly.

@@ -3,14 +3,14 @@ import type { Env } from '../env';
 import { ownerIds } from '../env';
 import {
   GAMES, CATEGORY_VALUES, CATEGORIES, categoryName,
-  COLOR_BAD, COLOR_OK, COLOR_PENDING, MAX_PROMPT_LENGTH, MAX_WYR_OPTION_LENGTH,
+  COLOR_BAD, COLOR_OK, COLOR_PENDING, MAX_PROMPT_LENGTH, MAX_WYR_OPTION_LENGTH, SIMILAR_MIN_SCORE,
 } from '../constants';
-import { getSql, getPrompt, transitionPrompt, editAndApprove, setReviewMessage, type Prompt, type Sql } from '../db';
+import { getSql, getPrompt, transitionPrompt, editAndApprove, setReviewMessage, findSimilar, type Prompt, type Sql } from '../db';
 import {
   button, row, ButtonStyle, discordApi, displayName, ephemeral, getModalValues, getUser,
   modal, textInput, TextInputStyle, updateMessage, type Interaction,
 } from '../discord';
-import { promptBody } from '../render';
+import { promptBody, promptOneLiner } from '../render';
 import { normalizePromptText } from '../text';
 
 export function isReviewer(i: Interaction, env: Env): boolean {
@@ -23,7 +23,23 @@ export function isReviewer(i: Interaction, env: Env): boolean {
   );
 }
 
-export function reviewEmbed(p: Prompt, statusLine?: string) {
+const SIMILAR_TITLE = '🔎 Similar prompts already in the deck';
+
+type EmbedField = { name: string; value: string; inline?: boolean };
+
+/** Builds the "similar prompts" field for a review card. */
+export async function similarField(sql: Sql, p: Prompt): Promise<EmbedField> {
+  const rows = await findSimilar(sql, p, SIMILAR_MIN_SCORE);
+  const lines = rows.map((r) => `${promptOneLiner(r, 110)} · ${Math.round(r.score * 100)}% match${r.status === 'pending' ? ' · *pending*' : ''}`);
+  return { name: SIMILAR_TITLE, value: (lines.join('\n') || 'None found — looks new! (Try `/hs-admin search` for other wordings.)').slice(0, 1024) };
+}
+
+/** Keeps the similar-prompts field when a review card is updated. */
+function keepSimilar(i: Interaction): EmbedField | undefined {
+  return (i.message?.embeds?.[0]?.fields ?? []).find((f: EmbedField) => f.name === SIMILAR_TITLE);
+}
+
+export function reviewEmbed(p: Prompt, statusLine?: string, similar?: EmbedField) {
   const g = GAMES[p.type];
   const color = p.status === 'approved' ? COLOR_OK : p.status === 'pending' ? COLOR_PENDING : COLOR_BAD;
   return {
@@ -40,6 +56,7 @@ export function reviewEmbed(p: Prompt, statusLine?: string) {
         inline: true,
       },
       { name: 'From server', value: p.source_guild_id ?? '—', inline: true },
+      ...(similar ? [similar] : []),
     ],
     footer: { text: `Prompt #${p.id}${statusLine ? ` • ${statusLine}` : ''}` },
   };
@@ -58,8 +75,14 @@ function reviewButtons(id: number) {
 /** Posts a pending submission to the review channel. Called in the background after /submit. */
 export async function postForReview(env: Env, sql: Sql, p: Prompt): Promise<void> {
   if (!env.REVIEW_CHANNEL_ID) return;
+  let similar: EmbedField | undefined;
+  try {
+    similar = await similarField(sql, p);
+  } catch (e) {
+    console.error('similarField', e); // never block the review post on this
+  }
   const msg = await discordApi<{ id: string }>(env, `/channels/${env.REVIEW_CHANNEL_ID}/messages`, 'POST', {
-    embeds: [reviewEmbed(p, 'Pending review')],
+    embeds: [reviewEmbed(p, 'Pending review', similar)],
     components: reviewButtons(p.id),
     allowed_mentions: { parse: [] },
   });
@@ -102,10 +125,10 @@ export async function handleReviewButton(i: Interaction, env: Env, parts: string
   if (!updated) {
     const current = await getPrompt(sql, id);
     if (!current) return updateMessage({ content: `Prompt #${id} no longer exists.`, embeds: [], components: [] });
-    return updateMessage({ embeds: [reviewEmbed(current, `Already ${current.status}`)], components: [] });
+    return updateMessage({ embeds: [reviewEmbed(current, `Already ${current.status}`, keepSimilar(i))], components: [] });
   }
   const verb = to === 'approved' ? '✅ Approved' : '✖️ Rejected';
-  return updateMessage({ embeds: [reviewEmbed(updated, `${verb} by ${displayName(reviewer)}`)], components: [] });
+  return updateMessage({ embeds: [reviewEmbed(updated, `${verb} by ${displayName(reviewer)}`, keepSimilar(i))], components: [] });
 }
 
 /** Modal: revedit:<id> */
@@ -132,7 +155,7 @@ export async function handleReviewEditModal(i: Interaction, env: Env, parts: str
   const updated = await editAndApprove(sql, id, { text, option_b, category, is_adult: adultRaw.startsWith('y') }, reviewer.id);
   if (!updated) return ephemeral(`Couldn't save #${id} — it's no longer pending, or the edit duplicates an existing prompt.`);
   return updateMessage({
-    embeds: [reviewEmbed(updated, `✏️ Edited & approved by ${displayName(reviewer)}`)],
+    embeds: [reviewEmbed(updated, `✏️ Edited & approved by ${displayName(reviewer)}`, keepSimilar(i))],
     components: [],
   });
 }

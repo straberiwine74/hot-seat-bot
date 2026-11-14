@@ -1,10 +1,12 @@
 // /hs-admin — owner/reviewer tools, registered only in the support server.
 import type { Env } from '../env';
 import { ownerIds } from '../env';
-import { COLOR_INFO, GAMES, type GameType } from '../constants';
-import { getSql, getPrompt, getStats, listTrusted, transitionPrompt, trustUser, untrustUser } from '../db';
+import { COLOR_INFO, GAMES, SEARCH_PAGE_SIZE, normalizeForSearch, type GameType } from '../constants';
+import {
+  getSql, getPrompt, getStats, listTrusted, transitionPrompt, trustUser, untrustUser, searchPrompts, type SearchStatus,
+} from '../db';
 import { displayName, ephemeral, getOptions, getUser, type Interaction } from '../discord';
-import { promptBody } from '../render';
+import { promptBody, promptOneLiner } from '../render';
 import { isReviewer } from './review';
 
 export async function handleAdminCommand(i: Interaction, env: Env) {
@@ -63,6 +65,37 @@ export async function handleAdminCommand(i: Interaction, env: Env) {
         return ephemeral(cur ? `#${id} is currently **${cur.status}** — no change made.` : `No prompt #${id}.`);
       }
       return ephemeral(`${to === 'removed' ? '🗑️ Removed' : '♻️ Restored'} #${id}:\n${promptBody(p)}`);
+    }
+    case 'search': {
+      const terms = String(o.terms ?? '')
+        .split('|')
+        .map((t) => normalizeForSearch(t.replace(/\s+/g, ' ').trim()))
+        .filter((t) => t.length >= 2)
+        .slice(0, 10);
+      if (!terms.length) return ephemeral('Give me at least one word or phrase (2+ letters). Separate alternatives with `|`.');
+      const status = (o.status ?? 'approved') as SearchStatus;
+      const page = Math.max(1, Number(o.page ?? 1));
+      const { rows, total } = await searchPrompts(sql, terms, (o.game as GameType) ?? null, status, SEARCH_PAGE_SIZE, (page - 1) * SEARCH_PAGE_SIZE);
+      const pages = Math.max(1, Math.ceil(total / SEARCH_PAGE_SIZE));
+      const filters = [o.game ? GAMES[o.game as GameType].label : null, status === 'all' ? 'any status' : status].filter(Boolean).join(' · ');
+      const header = `Searched for: ${terms.map((t) => `\`${t}\``).join(' or ')} · ${filters}`;
+      if (!total) return ephemeral(`${header}\n\nNo matches. 🎉`);
+      if (!rows.length) return ephemeral(`${header}\n\nPage ${page} is past the end — there ${pages === 1 ? 'is 1 page' : `are ${pages} pages`}.`);
+      const start = (page - 1) * SEARCH_PAGE_SIZE + 1;
+      let desc = '';
+      for (const r of rows) {
+        const line = promptOneLiner(r, 140) + (status === 'all' && r.status !== 'approved' ? ` · *${r.status}*` : '') + '\n';
+        if (desc.length + line.length > 3900) break;
+        desc += line;
+      }
+      return ephemeral(header, {
+        embeds: [{
+          title: `🔎 ${total} match${total === 1 ? '' : 'es'}`,
+          color: COLOR_INFO,
+          description: desc,
+          footer: { text: `Showing ${start}–${start + rows.length - 1} of ${total} · page ${page}/${pages}${page < pages ? ' · add page:' + (page + 1) + ' for more' : ''}` },
+        }],
+      });
     }
     case 'show': {
       const p = await getPrompt(sql, Number(o.id));

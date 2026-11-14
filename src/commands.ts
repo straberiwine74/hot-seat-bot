@@ -1,5 +1,13 @@
 // Slash command definitions. After changing anything here, run `npm run register`.
 import { CATEGORIES, GAME_CHOICES, RATING_CHOICES } from './constants';
+
+const STATUS_CHOICES = [
+  { name: 'Approved (in the deck)', value: 'approved' },
+  { name: 'Pending review', value: 'pending' },
+  { name: 'Rejected', value: 'rejected' },
+  { name: 'Removed', value: 'removed' },
+  { name: 'All', value: 'all' },
+];
 import { OptionType } from './discord';
 
 const GUILD_ONLY = { contexts: [0], integration_types: [0] }; // server installs, server channels only
@@ -81,6 +89,17 @@ export const SUPPORT_GUILD_COMMANDS = [
       },
       { type: OptionType.SUB_COMMAND, name: 'trusted', description: 'List trusted submitters' },
       { type: OptionType.SUB_COMMAND, name: 'stats', description: 'Deck and usage stats' },
+      {
+        type: OptionType.SUB_COMMAND,
+        name: 'search',
+        description: 'Search prompts by word or phrase (use | for alternatives)',
+        options: [
+          { type: OptionType.STRING, name: 'terms', description: 'e.g. menage | threesome | three way', required: true, max_length: 200 },
+          { type: OptionType.STRING, name: 'game', description: 'Only this game', choices: GAME_CHOICES },
+          { type: OptionType.STRING, name: 'status', description: 'Default: Approved', choices: STATUS_CHOICES },
+          { type: OptionType.INTEGER, name: 'page', description: 'Results page (20 per page)', min_value: 1 },
+        ],
+      },
       {
         type: OptionType.SUB_COMMAND,
         name: 'show',

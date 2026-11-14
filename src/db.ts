@@ -2,6 +2,7 @@ import { neon } from '@neondatabase/serverless';
 import type { Env } from './env';
 import { ownerIds } from './env';
 import type { AdultDefault, GameType } from './constants';
+import { topicOverlap } from './text';
 
 /** Tagged-template SQL function (Neon's HTTP driver; a pg adapter is used in tests). */
 export type Sql = (strings: TemplateStringsArray, ...values: any[]) => Promise<any[]>;
@@ -229,6 +230,59 @@ export async function editAndApprove(
 export async function countPending(sql: Sql, userId: string): Promise<number> {
   const rows = await sql`SELECT COUNT(*)::int AS n FROM prompts WHERE submitted_by = ${userId} AND status = 'pending'`;
   return rows[0]?.n ?? 0;
+}
+
+// ── Search & similar prompts ─────────────────────────────────
+export type SearchStatus = Prompt['status'] | 'all';
+
+/** Case/accent-insensitive "contains any of these terms" search across prompt text (and WYR option B). */
+export async function searchPrompts(
+  sql: Sql,
+  normalizedTerms: string[],
+  type: GameType | null,
+  status: SearchStatus,
+  limit: number,
+  offset: number,
+): Promise<{ rows: Prompt[]; total: number }> {
+  const patterns = normalizedTerms.map((t) => '%' + t.replace(/[\\%_]/g, (c) => '\\' + c) + '%');
+  const st = status === 'all' ? null : status;
+  const rows = await sql`
+    SELECT * FROM prompts
+    WHERE hs_norm(text || ' ' || COALESCE(option_b, '')) LIKE ANY(${patterns}::text[])
+      AND (${type}::text IS NULL OR type = ${type}::text)
+      AND (${st}::text IS NULL OR status = ${st}::text)
+    ORDER BY id
+    LIMIT ${limit} OFFSET ${offset}`;
+  const count = await sql`
+    SELECT COUNT(*)::int AS n FROM prompts
+    WHERE hs_norm(text || ' ' || COALESCE(option_b, '')) LIKE ANY(${patterns}::text[])
+      AND (${type}::text IS NULL OR type = ${type}::text)
+      AND (${st}::text IS NULL OR status = ${st}::text)`;
+  return { rows: rows as Prompt[], total: count[0]?.n ?? 0 };
+}
+
+/**
+ * Live prompts (any game) about the same thing as `p` — shown on review cards.
+ * Step 1: Postgres trigram similarity pulls the 50 closest-worded candidates.
+ * Step 2: re-rank by shared topic words, so boilerplate like "Have you ever…" doesn't count.
+ */
+export async function findSimilar(
+  sql: Sql,
+  p: Pick<Prompt, 'id' | 'text' | 'option_b'>,
+  minScore: number,
+  limit = 3,
+): Promise<Array<Prompt & { score: number }>> {
+  const doc = p.text + ' ' + (p.option_b ?? '');
+  const candidates = (await sql`
+    SELECT p.* FROM prompts p
+    WHERE p.id <> ${p.id} AND p.status IN ('approved', 'pending')
+    ORDER BY similarity(hs_norm(p.text || ' ' || COALESCE(p.option_b, '')), hs_norm(${doc})) DESC
+    LIMIT 50`) as Prompt[];
+  return candidates
+    .map((c) => ({ ...c, score: topicOverlap(doc, c.text + ' ' + (c.option_b ?? '')) }))
+    .filter((c) => c.score >= minScore)
+    .sort((x, y) => y.score - x.score)
+    .slice(0, limit);
 }
 
 // ── Trusted submitters ───────────────────────────────────────
