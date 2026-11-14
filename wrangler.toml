@@ -1,0 +1,11 @@
+name = "hot-seat-bot"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+
+# Daily cleanup of old vote rows (UTC). Free tier includes cron triggers.
+[triggers]
+crons = ["17 9 * * *"]
+
+# All configuration values are set as secrets in production:
+#   npx wrangler secret put DISCORD_TOKEN   (etc. — see README)
+# For local scripts (register/import) they live in .dev.vars (never commit it).

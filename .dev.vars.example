@@ -1,0 +1,23 @@
+# Copy this file to .dev.vars and fill it in. NEVER commit .dev.vars.
+
+# Discord Developer Portal > your app > General Information
+DISCORD_APPLICATION_ID=
+DISCORD_PUBLIC_KEY=
+# Discord Developer Portal > your app > Bot > Reset Token
+DISCORD_TOKEN=
+
+# Neon dashboard > Connect > connection string (pooled is fine)
+DATABASE_URL=postgresql://user:password@ep-xxxx.us-east-2.aws.neon.tech/neondb?sslmode=require
+
+# Your support server (right-click > Copy ID with Developer Mode on)
+SUPPORT_GUILD_ID=
+# Channel in the support server where new submissions are posted for approval
+REVIEW_CHANNEL_ID=
+# Channel in the support server where player reports are posted
+REPORT_CHANNEL_ID=
+# Optional: role in the support server allowed to approve/reject (owners always can)
+REVIEWER_ROLE_ID=
+# Your Discord user ID (comma-separate for co-owners). Owners are always trusted.
+OWNER_IDS=
+# Optional: invite link to the support server, shown in /hotseat
+SUPPORT_INVITE_URL=

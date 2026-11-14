@@ -1,0 +1,25 @@
+{
+  "name": "hot-seat-bot",
+  "version": "0.1.2",
+  "private": true,
+  "description": "The Hot Seat — Truth or Dare, Never Have I Ever, and Would You Rather for Discord (slash commands, serverless).",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "register": "tsx --env-file=.dev.vars scripts/register.ts",
+    "import": "tsx --env-file=.dev.vars scripts/import.ts",
+    "logs": "wrangler tail"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261113.1",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "wrangler": "^4.0.0"
+  }
+}
