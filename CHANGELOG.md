@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Added
+- docs: `docs/` site for GitHub Pages: landing page, Terms of Service (`terms.html`), and Privacy Policy (`privacy.html`) for the Developer Portal's required URLs. The privacy policy matches what `db/schema.sql` actually stores (votes pruned after 14 days, credit opt-in, no message content).
+
 ## [0.1.3] — 2026-11-14
 ### Added
 - feat: `/hs-admin search terms:` — case- and accent-insensitive search of prompt text (incl. WYR option B). Use `|` for alternatives (`menage | threesome | three way`). Filters: `game`, `status` (default Approved, or All), `page` (20 per page).
