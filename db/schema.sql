@@ -56,6 +56,8 @@ ALTER TABLE guild_settings ADD COLUMN IF NOT EXISTS guild_nsfw_checked_at TIMEST
 -- v0.1.2
 ALTER TABLE guild_settings ADD COLUMN IF NOT EXISTS adult_default TEXT NOT NULL DEFAULT 'mix'
   CHECK (adult_default IN ('mix', 'adult'));
+-- v0.1.4: list who voted each way on NHIE / WYR cards (TRUE) or show counts only (FALSE)
+ALTER TABLE guild_settings ADD COLUMN IF NOT EXISTS show_voters BOOLEAN NOT NULL DEFAULT TRUE;
 
 -- ─────────────────────────────────────────────────────────────
 -- No-repeat memory: which prompts each server has already seen

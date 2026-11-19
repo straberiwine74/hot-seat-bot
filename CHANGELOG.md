@@ -1,8 +1,14 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.4] — 2026-11-18
 ### Added
+- feat: NHIE and WYR cards list who voted each way under the prompt (e.g. "🙋 I have (2): @Sherbear, @Roy"), not just the counts on the buttons. Changing your vote moves your name. Names show as mentions but never ping anyone. Long lists end with "+N more". No database change: votes already stored user IDs.
+- feat: `/settings voter-names enabled:` lets server admins (Manage Server or the Hot Seat admin role) turn voter names off, so NHIE / WYR cards show counts only. On by default. Turning it off also clears names already on a card the next time someone votes. Shown in `/settings view`.
+- docs: Privacy Policy notes that votes on a card are visible to the channel unless the server turns voter names off. Effective date updated to 2026-11-18.
 - docs: `docs/` site for GitHub Pages: landing page, Terms of Service (`terms.html`), and Privacy Policy (`privacy.html`) for the Developer Portal's required URLs. The privacy policy matches what `db/schema.sql` actually stores (votes pruned after 14 days, credit opt-in, no message content).
+- docs: Public changelog page (`docs/changelog.html`), linked from every page's nav. Update it alongside this file for each release.
+### Database
+- `guild_settings.show_voters` (BOOLEAN, default TRUE). Run the v0.1.4 ALTER in `db/schema.sql`.
 
 ## [0.1.3] — 2026-11-14
 ### Added

@@ -34,6 +34,7 @@ export interface GuildSettings {
   adult_channel_ids: string[];
   adult_default: AdultDefault;
   admin_role_id: string | null;
+  show_voters: boolean;
   guild_nsfw_level: number | null;
   guild_nsfw_checked_at: string | null;
   tier: string;
@@ -50,6 +51,7 @@ export async function getGuildSettings(sql: Sql, guildId: string): Promise<Guild
       adult_channel_ids: [],
       adult_default: 'mix',
       admin_role_id: null,
+      show_voters: true,
       guild_nsfw_level: null,
       guild_nsfw_checked_at: null,
       tier: 'free',
@@ -79,6 +81,11 @@ export async function setAdultChannels(sql: Sql, guildId: string, channelIds: st
 export async function setAdminRole(sql: Sql, guildId: string, roleId: string | null): Promise<void> {
   await sql`INSERT INTO guild_settings (guild_id, admin_role_id) VALUES (${guildId}, ${roleId})
             ON CONFLICT (guild_id) DO UPDATE SET admin_role_id = EXCLUDED.admin_role_id, updated_at = NOW()`;
+}
+
+export async function setShowVoters(sql: Sql, guildId: string, show: boolean): Promise<void> {
+  await sql`INSERT INTO guild_settings (guild_id, show_voters) VALUES (${guildId}, ${show})
+            ON CONFLICT (guild_id) DO UPDATE SET show_voters = EXCLUDED.show_voters, updated_at = NOW()`;
 }
 
 export async function setGuildNsfwLevel(sql: Sql, guildId: string, level: number): Promise<void> {
@@ -307,13 +314,14 @@ export async function listTrusted(sql: Sql): Promise<Array<{ user_id: string; us
 }
 
 // ── Votes ────────────────────────────────────────────────────
-export async function castVote(sql: Sql, messageId: string, userId: string, choice: 0 | 1): Promise<[number, number]> {
+/** Records (or changes) a vote and returns the user IDs on each side, oldest vote first. */
+export async function castVote(sql: Sql, messageId: string, userId: string, choice: 0 | 1): Promise<[string[], string[]]> {
   await sql`INSERT INTO votes (message_id, user_id, choice) VALUES (${messageId}, ${userId}, ${choice})
             ON CONFLICT (message_id, user_id) DO UPDATE SET choice = EXCLUDED.choice`;
-  const rows = await sql`SELECT choice, COUNT(*)::int AS n FROM votes WHERE message_id = ${messageId} GROUP BY choice`;
-  const counts: [number, number] = [0, 0];
-  for (const r of rows) counts[r.choice as 0 | 1] = r.n;
-  return counts;
+  const rows = await sql`SELECT user_id, choice FROM votes WHERE message_id = ${messageId} ORDER BY created_at`;
+  const voters: [string[], string[]] = [[], []];
+  for (const r of rows) voters[r.choice as 0 | 1].push(r.user_id as string);
+  return voters;
 }
 
 export async function pruneVotes(sql: Sql): Promise<void> {

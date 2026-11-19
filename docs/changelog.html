@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Changelog · The Hot Seat</title><link rel="icon" href="logo.png"><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><img src="logo.png" alt="The Hot Seat logo"><h1>THE HOT SEAT</h1><p>Changelog</p></header>
+<nav><a href="./">Home</a><a href="changelog.html" aria-current="page">Changelog</a><a href="terms.html">Terms of Service</a><a href="privacy.html">Privacy Policy</a></nav>
+<main>
+<p class="meta">What's new in The Hot Seat, newest first.</p>
+
+<h2>v0.1.4 <span class="date">November 18, 2026</span></h2>
+<h3>New</h3>
+<ul>
+<li><strong>See who voted.</strong> Never Have I Ever and Would You Rather cards now list who voted each way under the prompt, not just the totals on the buttons. Change your vote and your name moves with it. Names never ping anyone, and long lists end with "+N more".</li>
+<li><strong>Voter names setting.</strong> Server admins can turn voter names off with <code>/settings voter-names enabled:False</code> so cards show vote counts only. It's on by default, and <code>/settings view</code> shows the current setting.</li>
+<li><strong>Website.</strong> This site, with the Terms of Service, Privacy Policy, and this changelog.</li>
+</ul>
+<h3>Updated</h3>
+<ul>
+<li>Privacy Policy: votes on a card are visible to the channel unless the server turns voter names off.</li>
+</ul>
+
+<h2>v0.1.3 <span class="date">November 14, 2026</span></h2>
+<h3>New</h3>
+<ul>
+<li><strong>Prompt search for the review team.</strong> <code>/hs-admin search</code> finds prompts by word or phrase, ignoring capitals and accents. Use <code>|</code> to search several terms at once, and filter by game, status, and page.</li>
+<li><strong>Similar-prompt check.</strong> Every submission in the review queue lists up to 3 prompts already in the deck on the same topic, so reviewers can catch repeats that are worded differently.</li>
+</ul>
+
+<h2>v0.1.2 <span class="date">November 14, 2026</span></h2>
+<h3>New</h3>
+<ul>
+<li><strong>18+ default mode.</strong> <code>/settings adult</code> takes a <code>mode</code>: <em>Mixed (clean + 18+)</em> or <em>18+ only</em>, used by default in 18+ channels. Players can still pick a rating themselves.</li>
+<li><code>/settings view</code> shows the default mode and whether the bot could check the server's Age-Restricted setting.</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li>If the bot can't read a server's Age-Restricted setting, it now says so and explains the fix instead of quietly serving clean prompts only.</li>
+<li>Next, Truth, Dare, and Random buttons follow the server's current settings on every click, unless the player picked a rating.</li>
+<li>Empty-deck messages explain when the other rating still has cards.</li>
+</ul>
+
+<h2>v0.1.1 <span class="date">November 13, 2026</span></h2>
+<h3>Fixed</h3>
+<ul>
+<li>18+ prompts now work in servers set to Age-Restricted server-wide, where Discord has no per-channel toggle.</li>
+</ul>
+<h3>Changed</h3>
+<ul>
+<li><code>/settings view</code> shows whether the server is Age-Restricted.</li>
+<li>Threads in an Age-Restricted server can show 18+ prompts, following the parent channel's settings.</li>
+</ul>
+
+<h2>v0.1.0 <span class="date">November 13, 2026</span></h2>
+<p>First release.</p>
+<ul>
+<li><strong>Games:</strong> <code>/tod</code>, <code>/truth</code>, <code>/dare</code>, <code>/nhie</code>, and <code>/wyr</code>, with category and rating filters and buttons to keep the game rolling.</li>
+<li><strong>Live voting</strong> on Never Have I Ever and Would You Rather cards.</li>
+<li><strong>No repeats:</strong> each server works through the whole deck before anything comes back around.</li>
+<li><strong>Community deck:</strong> suggest prompts with <code>/submit</code>. Every submission is reviewed before it goes live, duplicates are blocked, and you can choose to have your name shown on the card.</li>
+<li><strong>Reports:</strong> 🚩 any card that doesn't belong. Three reports from different people hide it until a reviewer decides.</li>
+<li><strong>Server settings:</strong> <code>/settings</code> turns 18+ on or off, limits it to chosen channels, and can give a role access to manage the bot.</li>
+<li><strong>18+ safety:</strong> 18+ prompts only appear in channels marked Age-Restricted in Discord.</li>
+<li><strong>Privacy:</strong> votes are deleted automatically after 14 days.</li>
+</ul>
+</main>
+<footer>© 2026 The Hot Seat. Not affiliated with or endorsed by Discord Inc.</footer>
+</body></html>

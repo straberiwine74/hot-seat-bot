@@ -87,6 +87,28 @@ export function voteLabel(game: 'nhie' | 'wyr', choice: 0 | 1, count: number): s
   return choice === 0 ? `🅰️ (${count})` : `🅱️ (${count})`;
 }
 
+/**
+ * Embed fields listing who voted each way. Mentions inside embeds show as names and never ping.
+ * Discord caps a field at 1024 characters, so long lists end with "+N more".
+ */
+export function voterFields(game: 'nhie' | 'wyr', voters: [string[], string[]]) {
+  const names = game === 'nhie' ? ['🙋 I have', '🙅 Never'] : ['🅰️ Voted A', '🅱️ Voted B'];
+  const list = (ids: string[]) => {
+    if (!ids.length) return '-';
+    const out: string[] = [];
+    let len = 0;
+    for (const [n, id] of ids.entries()) {
+      const m = `<@${id}>`;
+      const more = `+${ids.length - n} more`;
+      if (len + m.length + 2 + more.length + 1 > 1024) { out.push(more); break; }
+      out.push(m);
+      len += m.length + 2;
+    }
+    return out.join(', ');
+  };
+  return [0, 1].map((c) => ({ name: `${names[c]} (${voters[c].length})`, value: list(voters[c]), inline: true }));
+}
+
 export function helpEmbed(inviteUrl?: string) {
   return {
     title: `🔥 ${BOT_NAME}`,
@@ -103,7 +125,7 @@ export function helpEmbed(inviteUrl?: string) {
       '`/submit` — suggest a truth, dare, NHIE, or WYR for the shared deck\n' +
       '🚩 on any card — report a prompt that doesn\'t belong\n\n' +
       '**Server admins**\n' +
-      '`/settings view` · `/settings adult` · `/settings adult-channels` · `/settings admin-role`\n' +
+      '`/settings view` · `/settings adult` · `/settings adult-channels` · `/settings voter-names` · `/settings admin-role`\n' +
       '18+ prompts only appear in channels marked **Age-Restricted**, or anywhere in a server set to Age-Restricted.' +
       (inviteUrl ? `\n\n**Support:** ${inviteUrl}` : ''),
   };

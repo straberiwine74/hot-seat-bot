@@ -14,7 +14,7 @@ One shared deck in Neon Postgres, community submissions with an approval queue, 
 | `/tod` `/truth` `/dare` `/nhie` `/wyr` with optional `category` + `rating` | `/settings view` | Approve / Edit & approve / Reject buttons on every submission |
 | Buttons on each card keep the game rolling (Truth · Dare · 🎲 Random · Next) | `/settings adult enabled:` on/off | 🚩 report queue with Remove / Dismiss |
 | NHIE + WYR cards have live vote buttons | `/settings adult-channels` → channel dropdown (pick 1–25) | `/hs-admin trust` / `untrust` / `trusted` |
-| | | `/hs-admin search terms:menage \| threesome` — find existing prompts |
+| NHIE + WYR cards list who voted each way | `/settings voter-names enabled:` → names on cards, or counts only | `/hs-admin search terms:menage \| threesome` — find existing prompts |
 | `/submit` → pop-up form | `/settings adult enabled: mode:` → default to **Mixed** or **18+ only** in 18+ channels |
 | | `/settings admin-role` → let a role manage settings | `/hs-admin stats` / `show` / `remove` / `restore` |
 | 🚩 Report on any card | | CSV bulk import for seeding |

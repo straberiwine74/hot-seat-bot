@@ -5,7 +5,7 @@ import {
   type GuildSettings, type Sql,
 } from '../db';
 import { discordApi, displayName, ephemeral, getOptions, getUser, reply, updateMessage, type Interaction } from '../discord';
-import { parseCategory, promptCard, voteLabel } from '../render';
+import { parseCategory, promptCard, voteLabel, voterFields } from '../render';
 import { getTier, hasFeature } from '../premium';
 
 const THREAD_TYPES = new Set([10, 11, 12]);
@@ -183,15 +183,24 @@ async function play(
   return reply(promptCard(prompt, { rating: requestedRating ?? 'auto', category, requestedBy: displayName(getUser(i)) }));
 }
 
-/** Button: vote:<0|1> on an NHIE / WYR card. Updates the counts on the button labels. */
+/** Button: vote:<0|1> on an NHIE / WYR card. Updates the counts on the buttons and lists who voted each way. */
 export async function handleVoteButton(i: Interaction, env: Env, parts: string[]) {
   const choice = parts[1] === '1' ? 1 : 0;
   const msg = i.message;
   if (!msg) return ephemeral('That card is no longer available.');
 
-  const counts = await castVote(getSql(env), msg.id, getUser(i).id, choice);
+  const sql = getSql(env);
+  const [voters, settings] = await Promise.all([
+    castVote(sql, msg.id, getUser(i).id, choice),
+    i.guild_id ? getGuildSettings(sql, i.guild_id) : null,
+  ]);
+  const counts = [voters[0].length, voters[1].length];
   const isNhie = (msg.embeds?.[0]?.title ?? '').includes(GAMES.nhie.label);
   const game = isNhie ? 'nhie' : 'wyr';
+  // Server setting: list names (default) or counts only. Empty fields also clear names left from before it was turned off.
+  const fields = settings?.show_voters === false ? [] : voterFields(game, voters);
+  const [first, ...rest] = msg.embeds ?? [];
+  const embeds = first ? [{ ...first, fields }, ...rest] : msg.embeds;
 
   const components = (msg.components ?? []).map((r: any) => ({
     ...r,
@@ -201,5 +210,5 @@ export async function handleVoteButton(i: Interaction, env: Env, parts: string[]
       return c;
     }),
   }));
-  return updateMessage({ embeds: msg.embeds, components });
+  return updateMessage({ embeds, components });
 }

@@ -1,7 +1,7 @@
 // /settings — per-server configuration (Manage Server, or the server's chosen admin role).
 import type { Env } from '../env';
 import { COLOR_INFO, type AdultDefault } from '../constants';
-import { getSql, getGuildSettings, setAdultEnabled, setAdultChannels, setAdminRole, type GuildSettings } from '../db';
+import { getSql, getGuildSettings, setAdultEnabled, setAdultChannels, setAdminRole, setShowVoters, type GuildSettings } from '../db';
 import {
   button, row, ButtonStyle, ComponentType, ephemeral, getOptions, hasPermission, Permission,
   updateMessage, type Interaction,
@@ -38,6 +38,7 @@ function settingsEmbed(s: GuildSettings, i: Interaction, check: ServerAgeCheck) 
         inline: true,
       },
       { name: 'Default in 18+ channels', value: MODE_LABEL[s.adult_default ?? 'mix'], inline: true },
+      { name: 'Voter names on NHIE / WYR', value: s.show_voters === false ? '❌ Off (counts only)' : '✅ On', inline: true },
       { name: 'Plan', value: getTier(s, i) === 'premium' ? '⭐ Premium' : 'Free', inline: true },
       { name: '18+ channels', value: channels },
       { name: 'Bot admin role', value: s.admin_role_id ? `<@&${s.admin_role_id}>` : 'None (Manage Server only)' },
@@ -99,6 +100,13 @@ export async function handleSettingsCommand(i: Interaction, env: Env) {
           row(button('cfg:adultch-clear', 'Allow every eligible channel', ButtonStyle.SECONDARY)),
         ],
       });
+    case 'voter-names': {
+      const show = o.enabled === true;
+      await setShowVoters(sql, i.guild_id, show);
+      return ephemeral(show
+        ? '✅ NHIE and WYR cards will **list who voted** each way.'
+        : '✅ NHIE and WYR cards will show **vote counts only**, no names. Names already on a card disappear the next time someone votes on it.');
+    }
     case 'admin-role': {
       // Only true Manage Server holders can change who else gets admin access.
       if (!hasPermission(i, Permission.MANAGE_GUILD)) return ephemeral('🔒 Only members with **Manage Server** can change the admin role.');

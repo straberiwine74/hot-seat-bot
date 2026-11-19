@@ -3,21 +3,21 @@
 <title>Privacy Policy · The Hot Seat</title><link rel="icon" href="logo.png"><link rel="stylesheet" href="style.css"></head>
 <body>
 <header><img src="logo.png" alt="The Hot Seat logo"><h1>THE HOT SEAT</h1><p>Privacy Policy</p></header>
-<nav><a href="./">Home</a><a href="terms.html">Terms of Service</a><a href="privacy.html" aria-current="page">Privacy Policy</a></nav>
+<nav><a href="./">Home</a><a href="changelog.html">Changelog</a><a href="terms.html">Terms of Service</a><a href="privacy.html" aria-current="page">Privacy Policy</a></nav>
 <main>
-<p class="meta">Effective: November 14, 2026</p>
+<p class="meta">Effective: November 18, 2026</p>
 <p>This policy explains what information The Hot Seat Discord bot ("the Bot," "we," "us") collects, why, and what you can do about it. We collect only what the Bot needs to run its games, and we never sell your data.</p>
 
 <h2>1. What we collect</h2>
 <p>The Bot works through Discord slash commands and buttons. Each time you use one, Discord sends the Bot basic information about the interaction (such as your user ID, username, and the server and channel it happened in). We store only the items below.</p>
 <table>
 <tr><th>Information</th><th>When it's stored</th><th>Why</th></tr>
-<tr><td>Server ID and server settings (18+ on/off, selected 18+ channel IDs, admin role ID, default rating mode)</td><td>When the Bot is first used in a server, or an admin changes <code>/settings</code></td><td>To apply each server's game settings</td></tr>
+<tr><td>Server ID and server settings (18+ on/off, selected 18+ channel IDs, admin role ID, default rating mode, voter names on/off)</td><td>When the Bot is first used in a server, or an admin changes <code>/settings</code></td><td>To apply each server's game settings</td></tr>
 <tr><td>Whether a server is set to Age-Restricted in Discord</td><td>Checked periodically (about every 6 hours) and on <code>/settings</code></td><td>To decide where 18+ prompts are allowed</td></tr>
 <tr><td>Which prompts a server has already seen</td><td>Each time a card is shown</td><td>So prompts don't repeat until the deck runs out</td></tr>
 <tr><td>Prompt submissions: the text, game, category, rating, your user ID, the server it came from, and your display name</td><td>When you use <code>/submit</code></td><td>To review submissions, prevent spam, and show credit if you choose</td></tr>
 <tr><td>Reports: the prompt reported, your user ID, the server, and the reason you typed</td><td>When you press 🚩 Report</td><td>To moderate the shared deck</td></tr>
-<tr><td>Votes: your user ID and your choice on a card</td><td>When you vote on a Never Have I Ever or Would You Rather card</td><td>To show live vote counts. <strong>Deleted automatically after 14 days.</strong></td></tr>
+<tr><td>Votes: your user ID and your choice on a card</td><td>When you vote on a Never Have I Ever or Would You Rather card</td><td>To show live vote counts and, unless the server turned voter names off, who voted each way on that card. <strong>Deleted automatically after 14 days.</strong></td></tr>
 <tr><td>Trusted submitter list: user ID and display name</td><td>When our team marks someone as trusted</td><td>To let trusted users skip the review queue</td></tr>
 <tr><td>Play counts per prompt (not per person)</td><td>Each time a card is shown</td><td>To understand which prompts are popular</td></tr>
 </table>
@@ -29,7 +29,7 @@
 <h2>3. Who can see your information</h2>
 <ul>
 <li><strong>Our review team</strong> (the developer and approved volunteer reviewers) sees submissions and reports in a private channel in our support server. This includes the submitter's or reporter's Discord name and ID.</li>
-<li><strong>Players</strong> see prompts, vote totals, and the submitter's name only if credit was turned on.</li>
+<li><strong>Players</strong> see prompts, vote totals, who voted each way (unless the server turned voter names off), and the submitter's name only if credit was turned on.</li>
 <li><strong>Service providers</strong> that run the Bot: Discord (the platform), Cloudflare (hosting), and Neon (database hosting in the United States). They process data only to provide their services to us.</li>
 </ul>
 <p>We don't sell, rent, or share your data for advertising. We may disclose information if required by law or to protect the safety of users.</p>

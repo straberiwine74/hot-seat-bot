@@ -60,6 +60,12 @@ export const GLOBAL_COMMANDS = [
       { type: OptionType.SUB_COMMAND, name: 'adult-channels', description: 'Choose which channels may show 18+ prompts' },
       {
         type: OptionType.SUB_COMMAND,
+        name: 'voter-names',
+        description: 'Show who voted each way on NHIE / WYR cards, or counts only',
+        options: [{ type: OptionType.BOOLEAN, name: 'enabled', description: 'List voter names on cards?', required: true }],
+      },
+      {
+        type: OptionType.SUB_COMMAND,
         name: 'admin-role',
         description: 'Let a role manage these settings (leave empty to clear)',
         options: [{ type: OptionType.ROLE, name: 'role', description: 'Role that can manage Hot Seat settings' }],

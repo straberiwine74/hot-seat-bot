@@ -13,6 +13,11 @@ h2{color:var(--gold);margin-top:2em;font-size:1.25rem;border-bottom:1px solid va
 h2:first-of-type{margin-top:.5em}
 a{color:var(--fire)}
 .meta{color:var(--muted);font-size:.9rem}
+h3{color:var(--text);font-size:1rem;margin:1.2em 0 .3em}
+h2 .date{color:var(--muted);font-size:.85rem;font-weight:400;margin-left:8px}
+ul{padding-left:1.3em}
+li{margin:.35em 0}
+code{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:.88em}
 table{width:100%;border-collapse:collapse;font-size:.92rem;margin:12px 0}
 th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 th{color:var(--gold)}
